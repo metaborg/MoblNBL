@@ -43,6 +43,14 @@ rules // Top
     
 rules // Type
     
+  Type(_, x, _, _):
+    defines Type x of type SimpleType(x)
+    scopes Method, Property
+    
+  TypeNoSuper(_, x, _):
+  	defines Type x of type SimpleType(x)
+  	scopes Method, Property
+    
   ExternalType(_, x, _, _) :
   	defines Type x of type SimpleType(x)
   	scopes Method, Property
@@ -55,6 +63,7 @@ rules // Type
     defines Type x of type SimpleType(x)
     scopes Method, Property
     
+    
   Entity(_, x, _, _) :
     defines Type x of type SimpleType(x)
     scopes Method, Property
@@ -62,6 +71,7 @@ rules // Type
   EntityNoSuper(_, x, _) :
     defines Type x of type SimpleType(x)
     scopes Method, Property
+    
     
   SimpleType(x) :
   	refers to Type x
@@ -82,6 +92,10 @@ rules // Style
   Control(_, x, _, _) :
     defines Control x
     scopes Variable 
+    
+  ExternalControl(_, x, _) :
+    defines Control x
+    scopes Variable
 
 rules // Method
 

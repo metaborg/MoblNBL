@@ -134,6 +134,62 @@ rules
 rules
 
   nam-get-scope-types :
+    Type(_, x, _, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    Type(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    Type(_, x, _, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Type(_, x, _, _) -> <Type(id, nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Type(_, x, _, _) -> <store__> DefData(
+                                    [namespace__|path__]
+                                  , Type()
+                                  , SimpleType(x)
+                                  )
+
+  type-of :
+    Type(_, x, _, _) -> SimpleType(x)
+
+  nam-unique :
+    Type(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    TypeNoSuper(_, x, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    TypeNoSuper(_, x, _) -> [x]
+
+  nam-get-definitions :
+    TypeNoSuper(_, x, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    TypeNoSuper(_, x, _) -> <TypeNoSuper(id, nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    TypeNoSuper(_, x, _) -> <store__> DefData(
+                                        [namespace__|path__]
+                                      , Type()
+                                      , SimpleType(x)
+                                      )
+
+  type-of :
+    TypeNoSuper(_, x, _) -> SimpleType(x)
+
+  nam-unique :
+    TypeNoSuper(_, x, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
     ExternalType(_, x, _, _) -> [Method(), Property()]
 
   nam-get-definition-keys :
@@ -345,6 +401,24 @@ rules
 
   nam-unique :
     Control(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalControl(_, x, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalControl(_, x, _) -> [x]
+
+  nam-get-definitions :
+    ExternalControl(_, x, _) -> [(Control(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalControl(_, x, _) -> <ExternalControl(id, nam-annotate-def(|path__), id)>
+
+  nam-unique :
+    ExternalControl(_, x, _) -> <id>
 
 
 rules
