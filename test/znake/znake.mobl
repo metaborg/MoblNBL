@@ -1,0 +1,138 @@
+application znake
+
+import mobl::canvas
+import mobl::peersocket
+import mobl::ui::generic
+import data
+
+resource apple.gif
+resource dropping.gif
+
+screen root() {
+  header("ZNake")
+  var servers = Socket.listServers()
+  "Pick a server from the list"
+  group {
+    list(s in servers) {
+      item(onclick={ choosePlayer(s); }) { label(s) }
+    }
+    cond(servers.length == 0) {
+      item { "No servers are running currently. Run your own (click link below)." }
+    }
+  }
+  link("server.html", target="_blank") {
+    "Run your own server (from your browser!)"
+  }
+}
+
+screen choosePlayer(serverName : String) {
+  var playerName = ""
+  header("Player name") {
+    button("Play", onclick={
+      if(playerName != "") {
+        play(serverName, playerName.substr(0, 20).replace(/<[^>]*>/, ""));
+      } else {
+        alert("Name cannot be empty.");
+      }
+    })
+  }
+  group {
+    item {
+      textField(playerName, placeholder="Your name")
+    }
+  }
+}
+
+screen play(serverName : String, playerName : String) {
+  var g : Graphics = null
+  var appleImg = loadImage("apple.gif")
+  var droppingImg = loadImage("dropping.gif")
+  var playerInfo = ""
+
+  function drawPlayer(p : Player) {
+    if(p.isDead) {
+      g.fillStyle = "red";
+      g.fillText(p.name + " is dead", 0, 10);
+    } else {
+      g.fillStyle = p.color;
+      foreach((x, y) in p.tail) {
+        g.fillRect(x * 10, y * 10, 10, 10);
+      }
+      g.fillStyle = "black";
+      g.fillText(p.name, p.tail.get(0)._1 * 10, p.tail.get(0)._2 * 10);
+    }
+    playerInfo = playerInfo + "<tr><td>" + p.name + ":</td><td>" + p.score + "</td></tr>";
+  }
+
+  function drawApple(apple : Apple) {
+    g.drawImage(appleImg, apple.x*10, apple.y*10);
+  }
+
+  function drawDropping(dropping : Dropping) {
+    g.drawImage(droppingImg, dropping.x*10, dropping.y*10);
+  }
+
+  function clear() {
+    g.fillStyle = "white";
+    g.fillRect(0, 0, 500, 500);
+  }
+
+  function receiveUpdate(update : Update) {
+    clear();
+    playerInfo = "";
+    foreach(a in update.apples) {
+      drawApple(a);
+    }
+    foreach(d in update.droppings) {
+      drawDropping(d);
+    }
+    foreach(p in update.players) {
+      drawPlayer(p);
+    }
+  }
+
+  function disconnected() {
+    alert("Disconnected from server (maybe server shut down?)");
+  }
+
+  var socket : Socket = null
+
+  script {
+    async {
+      sleep(200);
+      socket = Socket.join(serverName, onmessage=receiveUpdate, ondisconnect=disconnected);
+      socket.send(playerName);
+    }
+    registerKeyPress({
+      if(event.which == 37) {
+        socket.send("left");
+      } else if(event.which == 39) {
+        socket.send("right");
+      } else if(event.which == 32) {
+        socket.send("drop");
+      }
+    });
+  }
+
+  header("Snake")
+  block {
+    button("Left", onclick={ socket.send("left"); })
+    button("Right", onclick={ socket.send("right"); })
+    button("Drop", onclick={ socket.send("drop"); })
+    "You can also use left, right and space on your keyboard"
+  }
+  floatBox(right=10, top=10) {
+    <table>
+    html(playerInfo)
+    </table>
+  }
+  canvas(g, 500, 500)
+}
+
+external sync function registerKeyPress(handler : Callback) : void
+
+<javascript>
+znake.registerKeyPress = function(cb) {
+  $(window).keyup(cb);
+};
+</javascript>

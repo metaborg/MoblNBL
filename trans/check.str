@@ -1,0 +1,15 @@
+module check
+
+imports
+  libstratego-lib
+  include/MoblNBL
+  lib/editor-common.generated
+  lib/index-library.generated
+  lib/analysis-library.generated
+  lib/analysis-library-internal.generated
+  lib/nbl-library.generated
+
+rules // Other
+  
+	constraint-warning = fail
+	constraint-note = fail

@@ -1,0 +1,253 @@
+application demo
+
+import mobl::ui::generic
+import phonegap::camera
+import phonegap::contact
+import phonegap::accelerometer
+import phonegap::compass 
+import phonegap::notification 
+import phonegap::filetransfer
+// resource config.xml
+// resource temp.pdf 
+  
+screen root() {    
+  header("PhoneGap")
+  group { 
+    item(onclick={ cameraDemo(); }) { "Camera" }
+    item(onclick={ contactDemo(); }) { "Contacts" }
+    item(onclick={ accelerometerDemo(); }) { "Accelerometer" }
+    item(onclick={ compassDemo(); }) { "Compass" }
+    item(onclick={ notificationDemo(); }) { "Notifications" }
+    item(onclick={ downloadDemo(); }) { "Download" }
+    
+  }
+}
+
+screen cameraDemo() {
+  var currentImage = $data(images/no-photo.jpg)
+  header("Camera") {
+    backButton()
+  }
+  button("Camera", onclick={
+    currentImage = Camera.takePicture();
+  })
+  button("Library", onclick={
+    currentImage = Camera.pickPictureFromLibrary();
+  })
+  block {
+    image(currentImage, width=200)
+  }
+}
+
+screen contactDemo() {
+  header("Contacts") {
+    backButton()
+  }
+  group {
+    item(onclick={ searchContactDemo(); }) { "Search" }
+    item(onclick={ CreateContact(); }) { "Create" }
+  }
+  
+}
+
+screen searchContactDemo() {
+  header("Search") {
+    backButton(onclick={contactDemo();})
+  }
+  var query : String = ""
+  
+  searchBox(query)
+ 
+	  list(c:Contact in Contact.find(["displayName","name","birthday","nickname","emails","published"], ContactFindOptions(filter=query, multiple=true)) ){
+	  	item(onclick={showContact(c);}){label(c.displayName)}
+ }
+}
+
+screen CreateContact(){
+	header("Create Contact") {
+    backButton()
+  } 
+	       var contact: Contact = Contact.create()
+	       script{
+	       		contact.displayName = "";
+	       }
+	       textField(contact.displayName,label="Nickname")   
+	       var name : ContactName = ContactName()       
+	       script{
+	       		name.givenName = "";
+	       		name.familyName = "";
+	       }
+	       textField(name.givenName, label = "givenName") 
+	       textField(name.familyName, label = "familyName")        
+
+	 button("Save",onclick={contact.nickname=contact.displayName; contact.name = name;contact.save(function(contact2:Contact){contact= contact2 ;alert("contact created");}, function(error:ContactError){alert("contact not changed" + error.code);});showContact(contact);})
+
+}
+
+screen showContact(c:Contact){
+	header("Contact") {
+    backButton(onclick={searchContactDemo();})
+  } 
+  	item(onclick={c.remove(function(){alert("contact removed");}, function(error:ContactError){alert("contact not removed"  + error.code);});searchContactDemo();}){"Remove"}
+  	item(onclick={var x = c.clone();showContact(x);}){"Clone"}
+  	item(onclick={editContact(c);}){"Change Name"}
+  	table {
+    row {
+    	headerCol{ "id" }
+    	col {label(c.id)}
+    }
+    row {
+    	headerCol{"displayName"}
+    	col{label(c.displayName)}
+    }
+     row {
+    	headerCol{"nickname"}
+    	col{label(c.nickname)}
+    }
+    row {
+    	headerCol{"published"}
+    	col{label(c.published)}
+    }
+    row {
+    	headerCol{"formated name"}
+    	col{label(c.name.formatted)}
+    }
+    row{
+    	headerCol{"birthday"}
+    	col {label(c.birthday)}
+    }
+    
+    
+   }
+   item(onclick={showEmails(c.emails);}){"Emails"} 
+  
+}
+
+screen showEmails(emails:[ContactField]){
+	header("Emails") {
+    backButton()
+  }
+	list(email:ContactField in emails){
+		item{label(email.value)}
+	}
+}
+
+screen editContact(c:Contact){
+header("Edit Contact") {
+    backButton()
+  }
+  textField(c.name.givenName, label="name")
+  button("Save",onclick={c.save(function(contact:Contact){c= contact;}, function(error:ContactError){});showContact(c);})
+}
+screen accelerometerDemo() {
+  var acc : Acceleration = null
+  var watchId = -1
+  header("Accelerometer") {
+    backButton()
+  }
+  when(acc) { 
+    table {
+      row {
+        headerCol { "X: "}
+        col { label(acc.x) }
+      }
+      row {
+        headerCol { "Y: "}
+        col { label(acc.y) }
+      }
+      row {
+        headerCol { "Z: "}
+        col { label(acc.z) }
+      }
+      row {
+        headerCol { "timestamp "}
+        col { label(acc.timestamp) }
+      }
+    }
+  } else {
+    "Getting data, hang on."
+  }
+
+  script {
+    watchId = Accelerometer.watchAcceleration(function(a : Acceleration) {
+      acc = a;
+    }, function() {
+      log("Fail");
+    }, frequency=100);
+  }
+}
+
+screen compassDemo() {
+  var value = CompassHeading()
+  var x = Compass.getCurrentHeading()
+  var watchId = -1 
+  header("Compass") {
+    backButton(onclick={
+      Compass.clearWatch(watchId);
+      screen return;
+    }) 
+  }   
+ 
+  label(value.headingAccuracy)
+  label(value.magneticHeading)
+  label(value.trueHeading)
+  label(x.timestamp)
+  block { label(watchId) }
+ 
+  script {
+    watchId = Compass.watchHeading(function(val : CompassHeading) {
+      value = val;
+    }, function(error : CompassError) {
+      log("Fail" + error.code);
+    }, frequency=100);  
+  }
+}
+ 
+screen notificationDemo() {
+  header("Notifications") {
+    backButton()
+  } 
+  button("Alert", onclick={
+    Notification.alert("Hello there", title="A Message", buttonName="OK");
+  })
+  button("Confirm", onclick={
+    alert("So you are " + Notification.confirm("What are you?", buttons=["Male", "Female"]));
+  })
+  button("Beep", onclick={
+    Notification.beep(3);
+  })
+  button("Vibrate", onclick={
+    Notification.vibrate(500);
+  })
+}
+
+screen downloadDemo() {
+	// <script src="childbrowser.js"></script>
+	header("Download") {
+    	backButton()
+  	} 
+  	button("download", onclick={
+   	 download();
+  	})
+  // button("iframe", onclick={
+  //  	 js();
+  // 	})
+
+}
+// screen js(){
+// 	<script src="childbrowser.js"></script>
+// 	header("js") {
+//     	backButton()
+//   	} 
+// 	<iframe src="temp.pdf" scrolling="auto"> </iframe>
+// }
+
+function download(){
+	
+	async{
+		alert("download started");
+		var path = LocalFileSystem.getPath();
+		var file = FileTransfer.downloadFile("http://webdsl.org/tutorial-event-planner-files/webdsl-tutorial.pdf", path + "/webdsl-tutorial.pdf");
+		alert("file has been downloaded : "+ file.fullPath); 	
+	}  		
+}

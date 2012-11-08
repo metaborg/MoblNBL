@@ -1,0 +1,150 @@
+application demo
+
+import mobl::ui::generic
+import mobl::yql
+import mobl::reflect
+
+style blogArticleStyle {
+  background: white;
+  margin: 0;
+  padding: 10px;
+}
+
+screen root() {
+  header("YQL Demos")
+  group {
+    item(onclick={ showFeed("http://mobl-lang.org/feed"); }) { "Feed reader" }
+    item(onclick={ pictureSearch(); }) { "Picture search" }
+    item(onclick={ queryInspector(); }) { "Query inspector" }
+    item(onclick={ urlFetcher(); }) { "URL Fetcher" }
+  }
+  link("http://developer.yahoo.com/yql/") { "Learn about YQL" }
+}
+
+screen showFeed(url : String) {
+  var result = async(YQL.query("select * from feednormalizer where url='" + url + "' and output='atom_1.0'"))
+  var title = "Hang on..."
+  header(title) {
+    backButton()
+  }
+  whenLoaded(result) {
+    script {
+      title = result.feed.title;
+    }
+    group {
+      list(entry in result.feed.entry) {
+        item(onclick={ showEntry(entry); }) { label(entry.title) }
+      }
+    }
+  }
+}
+
+screen showEntry(e : JSON) {
+  header(e.title) {
+    backButton()
+  }
+  block(blogArticleStyle) {
+    html(e.content.content)
+  }
+}
+
+screen pictureSearch() {
+  var phrase = "elephant"
+  var result = async(YQL.query("select thumbnail_url from search.images where query=\"" + phrase + "\" and mimetype like \"%jpeg%\""))
+  header("Picture search") {
+    backButton()
+  }
+  searchBox(phrase, onsearch={
+    result = YQL.query("select thumbnail_url from search.images where query=\"" + phrase + "\" and mimetype like \"%jpeg%\"");
+  })
+  whenLoaded(result) {
+    group {
+      list(entry in result.result) {
+        image(entry.thumbnail_url)
+      }
+    }
+  }
+}
+
+screen urlFetcher() {
+  var url = "http://zef.me"
+  header("URL Fetcher") {
+    backButton()
+  }
+  group {
+    item { textField(url, label="URL:") }
+  }
+  button("Fetch as JSON", onclick={
+    var result = YQL.fetchXMLAsJSON(url);
+    inspectJSON("result", result);
+  })
+  button("Fetch plain", onclick={
+    var result = YQL.fetchURL(url);
+    inspectJSON("result", result);
+  })
+}
+
+screen queryInspector() {
+  var query = "select * from feednormalizer where url='http://rss.news.yahoo.com/rss/topstories' and output='atom_1.0'"
+  header("Query") {
+    backButton()
+  }
+  group {
+    item { textField(query, label="YQL Query:") }
+  }
+  button("Execute", onclick={
+    var result = YQL.query(query);
+    inspectJSON("result", result);
+  })
+  <h2>"Sample queries"</h2>
+  group {
+    item {
+      "All countries in Europe"
+      sideButton("Set", onclick={
+        query = "select * from geo.countries where place=\"Europe\"";
+      })
+    }
+    item {
+      "Web search: 'mobl'"
+      sideButton("Set", onclick={
+        query = "select title,abstract,url from search.web where query=\"mobl\"";
+      })
+    }
+    item {
+      "Pictures of elephants"
+      sideButton("Set", onclick={
+        query = "select * from search.images where query=\"elephant\" and mimetype like \"%jpeg%\"";
+      })
+
+    }
+  }
+}
+
+screen inspectJSON(path: String, obj : JSON) {
+  header("Inspector") {
+    backButton()
+  }
+  "Path: " <code>label(path)</code>
+  when(Reflector.isArray(obj)) {
+    list(i in range(0, obj.length)) {
+      item(onclick={ inspectJSON(path+"["+i+"]", Reflector.get(obj, ""+i));}) {
+        label(i)
+      }
+    }
+  } else {
+    when(Reflector.isBool(obj) || Reflector.isNum(obj) || Reflector.isString(obj)) {
+      group {
+        item { label(obj) }
+      }
+    } else {
+      group {
+        list(prop in Reflector.getProperties(obj)) {
+          item(onclick={ inspectJSON(path+"."+prop, Reflector.get(obj, prop));}) {
+            label(prop)
+          }
+        }
+      }
+    }
+  }
+  <textarea databind=JSON.stringify(obj) style="width: 100%;" rows="7"/>
+}

@@ -1,0 +1,53 @@
+application demo
+
+import mobl::ui::generic
+
+resource lang/dutch.json
+resource lang/english.json
+resource lang/chinese.json
+
+type Preferences {
+  language : String
+}
+
+var prefs : Preferences = LocalStorage.getItem("preferences", Preferences(language="english"));
+
+function savePreferences() {
+  LocalStorage.setItem("preferences", prefs);
+}
+
+screen root() {
+  script {
+    fetchLanguageBundle("lang/" + prefs.language + ".json");
+  }
+  header(_("header-title"))
+  group {
+    item(onclick={ about(); }) { label(_("about")) }
+    item(onclick={ preferences(); }) { label(_("preferences")) }
+  }
+}
+
+screen about() {
+  header(_("about")) {
+    backButton(_("back"))
+  }
+  block {
+    label(_("about-message"))
+  }
+}
+
+screen preferences() {
+  header(_("preferences")) {
+    backButton(_("back"))
+    button(_("save"), onclick={
+      savePreferences();
+      reload();
+    })
+  }
+  group {
+    item {
+      label(_("language"), style=textFieldLabelStyle)
+      selectField(prefs.language, [("english", "English"), ("dutch", "Nederlands"), ("chinese", "Chinese")])
+    }
+  }
+}

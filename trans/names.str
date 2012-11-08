@@ -1,0 +1,755 @@
+module names
+
+imports
+  lib/analysis-library.generated
+  lib/analysis-library-internal.generated
+  lib/index-library.generated
+
+
+imports
+  include/MoblNBL
+
+
+signature
+  constructors
+    Type        : DefDataKind
+    Import      : DefDataKind
+    Transitive  : ImportAnno
+    CurrentFile : ImportAnno
+
+  constructors
+    Application : Namespace
+    Module      : Namespace
+    Import      : Namespace
+    Type        : Namespace
+    Screen      : Namespace
+    Style       : Namespace
+    Control     : Namespace
+    Method      : Namespace
+    Property    : Namespace
+    Variable    : Namespace
+
+
+rules
+
+  nam-get-scope-types :
+    Application(x, _) -> [ Screen()
+                         , Variable()
+                         , Style()
+                         , Control()
+                         , Type()
+                         , Method()
+                         ]
+
+  nam-get-definition-keys :
+    Application(x, _) -> [x]
+
+  nam-get-definitions :
+    Application(x, _) -> [(Application(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Application(x, _) -> <Application(nam-annotate-def(|path__), id)>
+
+  nam-unique :
+    Application(x, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Module(x, _) -> [ Screen()
+                    , Variable()
+                    , Style()
+                    , Control()
+                    , Type()
+                    , Method()
+                    ]
+
+  nam-get-definition-keys :
+    Module(x, _) -> [x]
+
+  nam-get-definitions :
+    Module(x, _) -> [(Module(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Module(x, _) -> <Module(nam-annotate-def(|path__), id)>
+
+  nam-unique :
+    Module(x, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    Import(x) -> [x]
+
+  nam-get-definitions :
+    Import(x) -> [(Import(), [x])]
+
+  nam-get-uses-keys :
+    Import(x) -> [x]
+
+  nam-get-uses :
+    Import(x) -> [(Module(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Import(x) -> <Import(nam-annotate-def(|path__))>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Variable()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Style()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Control()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Type()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Method()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalType(_, x, _, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    ExternalType(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalType(_, x, _, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalType(_, x, _, _) -> <ExternalType(id, nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    ExternalType(_, x, _, _) -> <store__> DefData(
+                                            [namespace__|path__]
+                                          , Type()
+                                          , SimpleType(x)
+                                          )
+
+  type-of :
+    ExternalType(_, x, _, _) -> SimpleType(x)
+
+  nam-unique :
+    ExternalType(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalTypeNoSuper(_, x, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    ExternalTypeNoSuper(_, x, _) -> [x]
+
+  nam-get-definitions :
+    ExternalTypeNoSuper(_, x, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalTypeNoSuper(_, x, _) -> <ExternalTypeNoSuper(id, nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    ExternalTypeNoSuper(_, x, _) -> <store__> DefData(
+                                                [namespace__|path__]
+                                              , Type()
+                                              , SimpleType(x)
+                                              )
+
+  type-of :
+    ExternalTypeNoSuper(_, x, _) -> SimpleType(x)
+
+  nam-unique :
+    ExternalTypeNoSuper(_, x, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalGenericType(_, x, _, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    ExternalGenericType(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalGenericType(_, x, _, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalGenericType(_, x, _, _) -> <ExternalGenericType(id, nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    ExternalGenericType(_, x, _, _) -> <store__> DefData(
+                                                   [namespace__|path__]
+                                                 , Type()
+                                                 , SimpleType(x)
+                                                 )
+
+  type-of :
+    ExternalGenericType(_, x, _, _) -> SimpleType(x)
+
+  nam-unique :
+    ExternalGenericType(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Entity(_, x, _, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    Entity(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    Entity(_, x, _, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Entity(_, x, _, _) -> <Entity(id, nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Entity(_, x, _, _) -> <store__> DefData(
+                                      [namespace__|path__]
+                                    , Type()
+                                    , SimpleType(x)
+                                    )
+
+  type-of :
+    Entity(_, x, _, _) -> SimpleType(x)
+
+  nam-unique :
+    Entity(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    EntityNoSuper(_, x, _) -> [Method(), Property()]
+
+  nam-get-definition-keys :
+    EntityNoSuper(_, x, _) -> [x]
+
+  nam-get-definitions :
+    EntityNoSuper(_, x, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    EntityNoSuper(_, x, _) -> <EntityNoSuper(id, nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    EntityNoSuper(_, x, _) -> <store__> DefData(
+                                          [namespace__|path__]
+                                        , Type()
+                                        , SimpleType(x)
+                                        )
+
+  type-of :
+    EntityNoSuper(_, x, _) -> SimpleType(x)
+
+  nam-unique :
+    EntityNoSuper(_, x, _) -> <id>
+
+
+rules
+
+  nam-get-uses-keys :
+    SimpleType(x) -> [x]
+
+  nam-get-uses :
+    SimpleType(x) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    SimpleType(x) -> <SimpleType(nam-annotate-use(|paths__, Type()))>
+
+
+rules
+
+  nam-get-scope-types :
+    ScreenNoReturnType(_, x, _, _) -> [ Variable()
+                                      , Style()
+                                      , Control()
+                                      , Type()
+                                      , Method()
+                                      , Property()
+                                      ]
+
+  nam-get-definition-keys :
+    ScreenNoReturnType(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ScreenNoReturnType(_, x, _, _) -> [(Screen(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ScreenNoReturnType(_, x, _, _) -> <ScreenNoReturnType(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ScreenNoReturnType(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Style(_, [StyleSelector(x)], _) -> [Variable()]
+
+  nam-get-definition-keys :
+    Style(_, [StyleSelector(x)], _) -> [x]
+
+  nam-get-definitions :
+    Style(_, [StyleSelector(x)], _) -> [(Style(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Style(_, [StyleSelector(x)], _) -> <Style(
+                                          id
+                                        , [StyleSelector(nam-annotate-def(|path__))]
+                                        , id
+                                        )>
+
+  nam-unique :
+    Style(_, [StyleSelector(x)], _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Control(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    Control(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    Control(_, x, _, _) -> [(Control(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Control(_, x, _, _) -> <Control(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    Control(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalFunction(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalFunction(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalFunction(_, x, _, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalFunction(_, x, _, _) -> <ExternalFunction(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ExternalFunction(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalSyncFunction(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalSyncFunction(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalSyncFunction(_, x, _, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalSyncFunction(_, x, _, _) -> <ExternalSyncFunction(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ExternalSyncFunction(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalSyncMethod(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalSyncMethod(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalSyncMethod(_, x, _, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalSyncMethod(_, x, _, _) -> <ExternalSyncMethod(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ExternalSyncMethod(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalMethod(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalMethod(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalMethod(_, x, _, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalMethod(_, x, _, _) -> <ExternalMethod(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ExternalMethod(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalStaticSyncMethod(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalStaticSyncMethod(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalStaticSyncMethod(_, x, _, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalStaticSyncMethod(_, x, _, _) -> <ExternalStaticSyncMethod(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ExternalStaticSyncMethod(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    ExternalStaticMethod(_, x, _, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    ExternalStaticMethod(_, x, _, _) -> [x]
+
+  nam-get-definitions :
+    ExternalStaticMethod(_, x, _, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ExternalStaticMethod(_, x, _, _) -> <ExternalStaticMethod(id, nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ExternalStaticMethod(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-uses-keys :
+    MethodCall(e, x, _) -> [x]
+    where SimpleType(t) := <type-of> e
+
+  nam-get-uses :
+    MethodCall(e, x, _) -> [(Method(), [x])]
+    where SimpleType(t) := <type-of> e
+
+  nam-annotate-names(|paths__, path__):
+    MethodCall(e, x, _) -> <MethodCall(
+                              id
+                            , nam-annotate-use(|paths__, Method())
+                            , id
+                            )>
+
+  adjust-index-lookup(target__|namespace__, path__, prefix__):
+    MethodCall(e, x, _) -> <index-lookup-children(|Method(), prefix__)> t
+    where <target__> x
+    where SimpleType(t) := <type-of> e
+
+
+rules
+
+  nam-get-uses-keys :
+    Call(x, _) -> [x]
+
+  nam-get-uses :
+    Call(x, _) -> [ (Method(), [x])
+                  , (Screen(), [x])
+                  , (Type(), [x])
+                  ]
+
+  nam-annotate-names(|paths__, path__):
+    Call(x, _) -> <Call(nam-annotate-use(|paths__, Method()), id)>
+
+  adjust-index-lookup(target__|namespace__, path__, prefix__):
+    Call(x, _) -> [ [Method()|path__]
+                  , [Screen()|path__]
+                  , [Type()|path__]
+                  ]
+    where <target__> x
+
+
+rules
+
+  nam-get-definition-keys :
+    Property(_, x, t, _) -> [x]
+
+  nam-get-definitions :
+    Property(_, x, t, _) -> [(Property(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Property(_, x, t, _) -> <Property(id, nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Property(_, x, t, _) -> <store__> DefData(
+                                        [namespace__|path__]
+                                      , Type()
+                                      , t
+                                      )
+
+  type-of :
+    Property(_, x, t, _) -> t
+
+  nam-unique :
+    Property(_, x, t, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    PropertyNoAnnos(_, x, t) -> [x]
+
+  nam-get-definitions :
+    PropertyNoAnnos(_, x, t) -> [(Property(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    PropertyNoAnnos(_, x, t) -> <PropertyNoAnnos(id, nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    PropertyNoAnnos(_, x, t) -> <store__> DefData(
+                                            [namespace__|path__]
+                                          , Type()
+                                          , t
+                                          )
+
+  type-of :
+    PropertyNoAnnos(_, x, t) -> t
+
+  nam-unique :
+    PropertyNoAnnos(_, x, t) -> <id>
+
+
+rules
+
+  nam-get-uses-keys :
+    FieldAccess(e, x) -> [x]
+    where SimpleType(t) := <type-of> e
+
+  nam-get-uses :
+    FieldAccess(e, x) -> [(Property(), [x])]
+    where SimpleType(t) := <type-of> e
+
+  nam-annotate-names(|paths__, path__):
+    FieldAccess(e, x) -> <FieldAccess(id, nam-annotate-use(|paths__, Property()))>
+
+  adjust-index-lookup(target__|namespace__, path__, prefix__):
+    FieldAccess(e, x) -> <index-lookup-children(|Property(), prefix__)> t
+    where <target__> x
+    where SimpleType(t) := <type-of> e
+
+
+rules
+
+  nam-get-definition-keys :
+    StyleVarDecl(StyleVar(x), _) -> [x]
+
+  nam-get-definitions :
+    StyleVarDecl(StyleVar(x), _) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    StyleVarDecl(StyleVar(x), _) -> <StyleVarDecl(StyleVar(nam-annotate-def(|path__)), id)>
+
+  nam-unique :
+    StyleVarDecl(StyleVar(x), _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    VarDecl(x, t, _) -> [x]
+
+  nam-get-definitions :
+    VarDecl(x, t, _) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    VarDecl(x, t, _) -> <VarDecl(nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    VarDecl(x, t, _) -> <store__> DefData(
+                                    [namespace__|path__]
+                                  , Type()
+                                  , t
+                                  )
+
+  type-of :
+    VarDecl(x, t, _) -> t
+
+  nam-unique :
+    VarDecl(x, t, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    VarDeclInferred(x, _) -> [x]
+
+  nam-get-definitions :
+    VarDeclInferred(x, _) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    VarDeclInferred(x, _) -> <VarDeclInferred(nam-annotate-def(|path__), id)>
+
+  nam-unique :
+    VarDeclInferred(x, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    FArg(x, t) -> [x]
+
+  nam-get-definitions :
+    FArg(x, t) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    FArg(x, t) -> <FArg(nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    FArg(x, t) -> <store__> DefData(
+                              [namespace__|path__]
+                            , Type()
+                            , t
+                            )
+
+  type-of :
+    FArg(x, t) -> t
+
+  nam-unique :
+    FArg(x, t) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    FArgOptional(x, t, _) -> [x]
+
+  nam-get-definitions :
+    FArgOptional(x, t, _) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    FArgOptional(x, t, _) -> <FArgOptional(nam-annotate-def(|path__), id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    FArgOptional(x, t, _) -> <store__> DefData(
+                                         [namespace__|path__]
+                                       , Type()
+                                       , t
+                                       )
+
+  type-of :
+    FArgOptional(x, t, _) -> t
+
+  nam-unique :
+    FArgOptional(x, t, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    ListInferred(x, _, _) -> [x]
+
+  nam-get-definitions :
+    ListInferred(x, _, _) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    ListInferred(x, _, _) -> <ListInferred(nam-annotate-def(|path__), id, id)>
+
+  nam-unique :
+    ListInferred(x, _, _) -> <id>
+
+
+rules
+
+  nam-get-definition-keys :
+    List(x, t, _, _) -> [x]
+
+  nam-get-definitions :
+    List(x, t, _, _) -> [(Variable(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    List(x, t, _, _) -> <List(nam-annotate-def(|path__), id, id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    List(x, t, _, _) -> <store__> DefData(
+                                    [namespace__|path__]
+                                  , Type()
+                                  , t
+                                  )
+
+  type-of :
+    List(x, t, _, _) -> t
+
+  nam-unique :
+    List(x, t, _, _) -> <id>
+
+
+rules
+
+  nam-get-uses-keys :
+    Var(x) -> [ x
+              , "Object"
+              , "JSON"
+              , "Dynamic"
+              , "elements"
+              , "event"
+              ]
+
+  nam-get-uses :
+    Var(x) -> [ (Variable(), [x])
+              , (Type(), [x])
+              , (Style(), [x])
+              , (Control(), [x])
+              , (Type(), ["Object"])
+              , (Type(), ["JSON"])
+              , (Type(), ["Dynamic"])
+              , (Control(), ["elements"])
+              , (Variable(), ["event"])
+              ]
+
+  nam-annotate-names(|paths__, path__):
+    Var(x) -> <Var(nam-annotate-use(|paths__, Variable()))>
+
+  adjust-index-lookup(target__|namespace__, path__, prefix__):
+    Var(x) -> <concat> [ [ [Variable()|path__]
+                         , [Type()|path__]
+                         , [Style()|path__]
+                         , [Control()|path__]
+                         ]
+                       , [Def([Type(), "Object"])]
+                       , [Def([Type(), "JSON"])]
+                       , [Def([Type(), "Dynamic"])]
+                       , [Def([Control(), "elements"])]
+                       , [Def([Variable(), "event"])]
+                       ]
+    where <target__> x

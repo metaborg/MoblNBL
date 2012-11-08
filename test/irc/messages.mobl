@@ -1,0 +1,31 @@
+module messages
+
+var MESSAGE_MESSAGE = 0;
+var MESSAGE_JOIN    = 1;
+var MESSAGE_PART    = 2;
+var MESSAGE_CONNECT = 3;
+
+type Message {
+  type    : Num
+  channel : String
+  nick    : String
+  message : String
+}
+
+type JoinMessage {
+  type    : Num
+  channel : String
+  nick    : String
+}
+
+type PartMessage {
+  type    : Num
+  channel : String
+  nick    : String
+}
+
+type ConnectMessage {
+  type : Num
+  host : String
+  nick : String
+}

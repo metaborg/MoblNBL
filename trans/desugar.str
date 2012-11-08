@@ -1,0 +1,37 @@
+module desugar
+
+imports
+  
+  libstratego-lib
+  include/MoblNBL
+
+strategies
+	
+	desugar-all = topdown(try(desugar))
+  
+rules
+
+  desugar:
+  	Module(name, defs) -> Module(<desugar-import-name> name, defs)
+  		
+  desugar:
+    Import(name) -> Import(<desugar-import-name> name)
+      
+  desugar-import-name:
+  	QId(l, r) -> <concat-strings> [l, r]
+  	where
+  		<is-string> l
+  		
+	desugar-import-name:
+	    QId(l, r) -> <concat-strings> [ls, r]
+	    where
+	      not(<is-string> l);
+	      ls := <desugar-import-name> l
+	      
+rules
+  
+  desugar:
+    Application(name, defs) -> Application(name, [Import("mobl")|defs])
+    
+  desugar:
+    Module(name, defs) -> Application(name, [Import("mobl")|defs])

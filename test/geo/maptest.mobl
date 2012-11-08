@@ -1,0 +1,22 @@
+application maptest
+
+import mobl::location
+import mobl::maps
+import mobl::ui::generic
+
+screen root() {
+  var position : Coordinates = null
+  script {
+    async {
+      position = getPosition();
+    }
+  }
+  header("Your location")
+  cond(position != null) {
+    label("Position: " + position.latitude + ", " + position.longitude)
+    map(position, zoom=15)
+  }
+  cond(position == null) {
+    "Determining current location... (requires recent webkit or Firefox)"
+  }
+}

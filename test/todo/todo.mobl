@@ -1,0 +1,56 @@
+application todo
+
+import mobl::ui::generic
+import model
+
+screen addTask() {
+  var newTask : Task = Task()
+
+  header("Add") {
+    backButton("Back", onclick= { screen return; })
+    button("Add", onclick={
+      add(newTask);
+      screen return;
+    })
+  }
+  group {
+    item { textField(newTask.name, placeholder="Task name") }
+  }
+}
+
+screen editTask(t : Task) {
+  header("Edit") {
+    button("Done", onclick={ screen return; })
+  }
+  group {
+    item { textField(t.name,
+                     placeholder="Task name") }
+    item { textField(t.description,
+                     placeholder="Task description") }
+  }
+}
+
+screen root() {
+  header("Tasks") {
+    button("Add", onclick={
+      addTask();
+    })
+  }
+  var phrase = ""
+  searchBox(phrase)
+  group {
+    list(t : Task in Task.searchPrefix(phrase)) {
+      item {
+        checkBox(t.done, label=t.name)
+        contextMenu {
+          button("Delete", onclick={
+            remove(t);
+          })
+          button("Edit", onclick={
+            editTask(t);
+          })
+        }
+      }
+    }
+  }
+}

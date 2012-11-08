@@ -1,0 +1,55 @@
+server server
+
+database
+  host     "localhost"
+  name     "mobl"
+  username "test"
+  password "test"
+
+import mobl::server::httpserver
+import mobl::server::socket
+
+entity Document {
+  name : String
+  body : String
+}
+
+var a = 8;
+a = 7;
+
+@service PUT /:name
+function put(req : Request, res : Response) {
+  var doc = Document.findBy("name", req.params.name);
+  if(!doc) {
+    doc = Document(name=req.params.name);
+    add(doc);
+  }
+  doc.body = req.rawBody;
+  res.send("OK");
+}
+
+@service GET /:name
+function get(req : Request, res : Response) {
+  var doc = Document.findBy("name", req.params.name);
+  if(doc) {
+    res.send(doc.body);
+  } else {
+    res.send("");
+  }
+}
+
+@socketevent("connect")
+function onConnect(client : Client) {
+  client.send("Welcome to my server!");
+}
+
+@socketevent("message")
+function onMessage(client : Client, msg : String) {
+  log(msg);
+  client.send(msg);
+}
+
+@socketevent("disconnect")
+function onDisconnect(client : Client) {
+  log(client);
+}

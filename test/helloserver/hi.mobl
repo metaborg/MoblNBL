@@ -1,0 +1,8 @@
+module hi
+
+import mobl::server::httpserver
+
+@service GET /hi
+function sayHi(req : Request, res : Response) {
+  res.send("Hi");
+}
