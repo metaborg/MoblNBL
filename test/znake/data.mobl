@@ -1,0 +1,25 @@
+module data
+
+type Update {
+  apples    : [Apple]
+  droppings : [Dropping]
+  players   : [Player]
+}
+
+type Player {
+  name   : String
+  color  : String
+  isDead : Bool
+  score  : Num
+  tail   : [(Num, Num)]
+}
+
+type Apple {
+  x    : Num
+  y    : Num
+}
+
+type Dropping {
+  x    : Num
+  y    : Num
+}

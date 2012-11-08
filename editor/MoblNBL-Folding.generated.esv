@@ -1,0 +1,87 @@
+module MoblNBL-Folding.generated
+
+folding Default folding definitions
+  
+  // Folding rules indicate which syntactic constructs can be folded,
+  // and take one of the following forms:
+  //
+  //   <sort>.<constructor>
+  //
+  //   <sort>._
+  //
+  //   _.<constructor>
+  //
+  // To indicate that an element should always be folded, add
+  // a (folded) annotation:
+  //
+  //   _.Imports (folded)
+  //
+  // To disable a folding rule defined elsewhere, add a (disabled) annotation:
+  //
+  //   Definition._ (disabled)
+  
+  Start.Configuration
+  Setting.IconSetting
+  Path.Path
+  Path.AbsolutePath
+  Setting.StdLibSetting
+  Setting.LibSetting
+  Setting.StyleVarSetting
+  StyleExp.ImportData
+  StyleExp.StylePath
+  Setting.NativeSettings
+  NativeSetting.buildfarmPlatforms
+  Start.ServerApplication
+  Definition.Entity
+  MetaAnno.SyncEntityAnno
+  UriPath.UriPath
+  MetaAnno.ServiceAnno
+  Exp.RegExp
+  Atom.CharacterClass
+  FArg.FArg
+  Exp.ImportData
+  Filter.PrefetchFilter
+  EntityBodyDecl.Property
+  EntityBodyDecl.PropertyNoAnnos
+  Definition.EntityNoSuper
+  Definition.Service
+  ServiceElem.Resource
+  Definition.TypeNoSuper
+  Definition.Type
+  Definition.ExternalTypeNoSuper
+  ExternalMemberDecl.ExternalStaticMethod
+  ExternalMemberDecl.ExternalMethod
+  ExternalMemberDecl.ExternalStaticSyncMethod
+  ExternalMemberDecl.ExternalSyncMethod
+  Definition.ExternalType
+  Definition.ExternalGenericType
+  Definition.ExternalControl
+  Definition.ExternalScreen
+  Definition.ExternalEntity
+  Definition.ExternalFunction
+  Definition.ExternalSyncFunction
+  Definition.ExternalVarDecl
+  Definition.ExternalControl
+  Definition.Style
+  StyleElem.StyleProperty
+  StyleExpsTL.StyleExpsCS
+  StyleExps
+  StyleElem.StyleMixinCall
+  Definition.StyleMixin
+  Definition.StyleVarDecl
+  Definition.ExternalStyle
+  Definition.MiddlewareUse
+  Definition.Load
+  Definition.Resource
+  Definition.Javascript
+  JSModule.JSModule
+  JSStat.JSVarDeclNoInit
+  JSExp.JSRegex
+  Definition.ModuleJavascript
+  Definition.JavascriptFor
+  Definition.ModuleJavascriptFor
+  Statement
+  Definition.ScreenNoReturnType
+  Definition.Screen
+  Start.Module
+  Start.Application

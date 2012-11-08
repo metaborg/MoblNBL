@@ -1,0 +1,80 @@
+application irc
+
+import mobl::socket
+import mobl::ui::generic
+import messages
+
+entity Update {
+  channel : String
+  nick    : String
+  message : String
+  date    : DateTime
+}
+
+function onMessage(msg : Dynamic) {
+  if(msg.type == MESSAGE_MESSAGE) {
+    var msg : Message = msg;
+    log(msg);
+    add(Update(channel=msg.channel, nick=msg.nick, message=msg.message, date=now()));
+  }
+}
+
+var conn = Socket.create(onMessage);
+
+screen root() {
+  var host = "irc.freenode.net"
+  var nick = "moblirc"
+  header("Connect") {
+    button("Connect", onclick={
+      conn.send(ConnectMessage(type=MESSAGE_CONNECT, host=host, nick=nick));
+      joinChannel(nick);
+    })
+  }
+  group {
+    item {
+      textField(host, label="host")
+    }
+    item {
+      textField(nick, label="nickname")
+    }
+  }
+}
+
+screen joinChannel(nick : String) {
+  var channel = "#serg"
+  header("Join channel") {
+    button("Join", onclick={
+      conn.send(JoinMessage(type=MESSAGE_JOIN, channel=channel));
+      showChannel(nick, channel);
+    })
+  }
+  group {
+    item { textField(channel) }
+  }
+}
+
+screen showChannel(nick : String, channel : String) {
+  var text = ""
+  header(channel)
+  group {
+    list(update in Update.all().filter("channel", "=", channel).order("date", false).limit(10).reverse()) {
+      item {
+        floatBox(right=0) {
+          <small>
+          label(update.date.toString())
+          </small>
+        }
+        <b>label(update.nick) ": "</b> label(update.message)
+      }
+    }
+  }
+  floatBox(bottom=10, left=0, right=0) {
+    <input type="text" databind=text placeholder="Your message here." onkeypress={
+      if(event.keyCode == 13) {
+        conn.send(Message(type=MESSAGE_MESSAGE, channel=channel, message=text));
+        add(Update(channel=channel, nick=nick, message=text, date=now()));
+        text = "";
+      }
+    }/>
+  }
+}

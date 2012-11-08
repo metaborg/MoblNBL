@@ -1,0 +1,180 @@
+Application(
+  "twittertrends"
+, [ Import("mobl")
+  , Import("mobluigeneric")
+  , Import("mobluistylemixin")
+  , Style(
+      []
+    , [StyleSelector("tweetStyle")]
+    , [ StyleProperty("padding", StyleExpsCS([NumUnit("10", PxUnit())]))
+      , StyleProperty("margin", StyleExpsCS([NumUnit("5", PxUnit())]))
+      , StyleProperty("min-height", StyleExpsCS([NumUnit("50", PxUnit())]))
+      , StyleProperty("background-color", StyleExpsCS([StyleId("white")]))
+      , StyleProperty(
+          "border"
+        , StyleExps(
+            [NumUnit("1", PxUnit()), StyleId("solid"), Color("#444")]
+          )
+        )
+      , StyleMixinCall("borderRadiusMixin", [StyleExps([NumUnit("10", PxUnit())])])
+      ]
+    )
+  , Style(
+      []
+    , [StyleSelector("tweetIconStyle")]
+    , [ StyleProperty("float", StyleExpsCS([StyleId("left")]))
+      , StyleProperty(
+          "margin"
+        , StyleExps(
+            [Num("0"), NumUnit("10", PxUnit()), Num("0"), Num("0")]
+          )
+        )
+      ]
+    )
+  , TypeNoSuper(
+      []
+    , "Trend"
+    , [ PropertyNoAnnos([], "name", SimpleType("String"))
+      , PropertyNoAnnos([], "url", SimpleType("String"))
+      , PropertyNoAnnos([], "query", SimpleType("String"))
+      ]
+    )
+  , TypeNoSuper(
+      []
+    , "Tweet"
+    , [ PropertyNoAnnos([], "profile_image_url", SimpleType("String"))
+      , PropertyNoAnnos([], "created_at", SimpleType("String"))
+      , PropertyNoAnnos([], "from_user", SimpleType("String"))
+      , PropertyNoAnnos([], "text", SimpleType("String"))
+      ]
+    )
+  , Function(
+      []
+    , "trendsMapper"
+    , [FArg("json", GenericType("Collection", [SimpleType("JSON")]))]
+    , ArrayType(SimpleType("Trend"))
+    , [Return(FieldAccess(MethodCall(Var("json"), "one", []), "trends"))]
+    )
+  , Function(
+      []
+    , "tweetsMapper"
+    , [FArg("json", SimpleType("JSON"))]
+    , ArrayType(SimpleType("Tweet"))
+    , [Return(FieldAccess(Var("json"), "results"))]
+    )
+  , Service(
+      []
+    , "Twitter"
+    , [ Resource(
+          []
+        , "trends"
+        , []
+        , SimpleType("JSON")
+        , [ PropVal("uri", String("\"https://api.twitter.com/1/trends/1.json\""))
+          , PropVal("encoding", String("\"jsonp\""))
+          , PropVal("method", String("\"GET\""))
+          , PropVal("mapper", Var("trendsMapper"))
+          ]
+        )
+      , Resource(
+          []
+        , "search"
+        , [FArg("query", SimpleType("String"))]
+        , SimpleType("JSON")
+        , [ PropVal(
+              "uri"
+            , BinMethodCall(
+                String("\"http://search.twitter.com/search.json?q=\"")
+              , "+"
+              , Call("escape", [Var("query")])
+              )
+            )
+          , PropVal("encoding", String("\"jsonp\""))
+          , PropVal("mapper", Var("tweetsMapper"))
+          ]
+        )
+      ]
+    )
+  , ScreenNoReturnType(
+      []
+    , "root"
+    , []
+    , [ ControlCallNoBody(Var("header"), [String("\"Twitter trends\"")])
+      , VarDeclInferred(
+          "trends"
+        , AsyncCall([MethodCall(Var("Twitter"), "trends", [])])
+        )
+      , ControlCall(
+          Var("whenLoaded")
+        , [Var("trends")]
+        , [ ControlCallNoArgs(
+              Var("group")
+            , [ ListInferred(
+                  "topic"
+                , Var("trends")
+                , [ ControlCall(
+                      Var("item")
+                    , [ NamedExp(
+                          "onclick"
+                        , Callback(
+                            [ExpStat(Call("search", [FieldAccess(Var("topic"), "name")]))]
+                          )
+                        )
+                      ]
+                    , [ControlCallNoBody(Var("label"), [FieldAccess(Var("topic"), "name")])]
+                    )
+                  ]
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    )
+  , ScreenNoReturnType(
+      []
+    , "search"
+    , [FArg("query", SimpleType("String"))]
+    , [ ControlCall(
+          Var("header")
+        , [Var("query")]
+        , [ControlCallNoBody(Var("backButton"), [])]
+        )
+      , VarDeclInferred(
+          "results"
+        , AsyncCall(
+            [MethodCall(Var("Twitter"), "search", [Var("query")])]
+          )
+        )
+      , ControlCall(
+          Var("whenLoaded")
+        , [Var("results")]
+        , [ ListInferred(
+              "tweet"
+            , Var("results")
+            , [ ControlCall(
+                  Var("block")
+                , [Var("tweetStyle")]
+                , [ ControlCallNoBody(
+                      Var("image")
+                    , [FieldAccess(Var("tweet"), "profile_image_url"), NamedExp("style", Var("tweetIconStyle"))]
+                    )
+                  , Html(
+                      "b"
+                    , []
+                    , [ ControlCallNoBody(Var("label"), [FieldAccess(Var("tweet"), "from_user")])
+                      , ScreenString("\": \"")
+                      ]
+                    , "b"
+                    )
+                  , ControlCallNoBody(Var("label"), [FieldAccess(Var("tweet"), "text")])
+                  ]
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    )
+  ]
+)

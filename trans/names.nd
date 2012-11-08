@@ -1,0 +1,176 @@
+module names
+
+imports
+	
+	include/MoblNBL
+	
+namespaces
+	
+	Application
+	Module
+	Import
+	
+	Type
+	
+	Screen
+	
+	Style
+	Control
+	
+	Method
+	Property
+	
+	Variable
+	
+rules // Top
+
+  Application(x, _) :
+    defines Application x
+    scopes Screen, Variable, Style, Control, Type, Method
+    
+  Module(x, _) :
+    defines Module x
+    scopes Screen, Variable, Style, Control, Type, Method
+    
+  Import(x) :
+    defines non-unique Import x
+    imports Variable from Module x {current-file}
+    imports Style from Module x {current-file}
+    imports Control from Module x {current-file}
+    imports Type from Module x {current-file}
+    imports Method from Module x {current-file}
+    refers to Module x
+    
+rules // Type
+    
+  ExternalType(_, x, _, _) :
+  	defines Type x of type SimpleType(x)
+  	scopes Method, Property
+  	
+  ExternalTypeNoSuper(_, x, _) :
+    defines Type x of type SimpleType(x)
+    scopes Method, Property
+  	
+  ExternalGenericType(_, x, _, _) :
+    defines Type x of type SimpleType(x)
+    scopes Method, Property
+    
+  Entity(_, x, _, _) :
+    defines Type x of type SimpleType(x)
+    scopes Method, Property
+    
+  EntityNoSuper(_, x, _) :
+    defines Type x of type SimpleType(x)
+    scopes Method, Property
+    
+  SimpleType(x) :
+  	refers to Type x
+    
+rules // Screen
+    
+  ScreenNoReturnType(_, x, _, _) :
+    defines Screen x
+    scopes Variable, Style, Control, Type, Method, Property
+    // HACK: Needs to scope everything to fix path creation.
+    
+rules // Style
+   
+  Style(_, [StyleSelector(x)], _) :
+    defines Style x
+    scopes Variable
+    
+  Control(_, x, _, _) :
+    defines Control x
+    scopes Variable 
+
+rules // Method
+
+  ExternalFunction(_, x, _, _) :
+    defines Method x
+    scopes Variable
+    
+  ExternalSyncFunction(_, x, _, _) :
+    defines Method x
+    scopes Variable
+
+
+  ExternalSyncMethod(_, x, _, _) :
+  	defines Method x
+  	scopes Variable
+  	
+  ExternalMethod(_, x, _, _) :
+    defines Method x
+    scopes Variable
+  	
+  	
+  ExternalStaticSyncMethod(_, x, _, _) :
+    defines Method x
+    scopes Variable
+    
+  ExternalStaticMethod(_, x, _, _) :
+    defines Method x
+    scopes Variable
+    
+    
+  MethodCall(e, x, _) :
+    refers to Method x in Type t
+    where e has type SimpleType(t) 
+    
+  Call(x, _) :
+    refers to Method x
+    refers to Screen x
+    refers to Type x
+
+rules // Property
+
+  Property(_, x, t, _) :
+    defines Property x of type t
+    
+  PropertyNoAnnos(_, x, t) :
+    defines Property x of type t
+    
+    
+  FieldAccess(e, x) :
+    refers to Property x in Type t
+    where e has type SimpleType(t)
+
+rules // Variable
+    
+  StyleVarDecl(StyleVar(x), _) :
+    defines Variable x
+    
+  VarDecl(x, t, _) :
+    defines Variable x of type t 
+    
+  VarDeclInferred(x, _) :
+    defines Variable x
+    
+    
+  FArg(x, t) :
+  	defines Variable x of type t
+  	
+  FArgOptional(x, t, _) :
+  	defines Variable x of type t
+    
+    
+  ListInferred(x, _, _) :
+  	defines Variable x
+  	
+  List(x, t, _, _) :
+    defines Variable x of type t
+  
+    
+  Var(x) :
+  	refers to Variable x
+  	refers to Type x
+  	refers to Style x
+  	refers to Control x
+  	
+  	refers to Type "Object"
+  	refers to Type "JSON"
+  	refers to Type "Dynamic"
+  	
+  	refers to Control "elements"
+  	
+  	refers to Variable "event"
+  	

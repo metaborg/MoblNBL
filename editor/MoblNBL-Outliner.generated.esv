@@ -1,0 +1,88 @@
+module MoblNBL-Outliner.generated
+
+outliner Default outliner        
+  
+  
+  // Outliner rules indicate which syntactic constructs should be shown in the outline
+  // and quick outline views, and take one of the following forms:
+  //
+  //   <sort>.<constructor>
+  //
+  //   <sort>._
+  //
+  //   _.<constructor>
+  
+  StyleExp.StylePath
+  StyleExp.StyleCall
+  Start.ServerApplication
+  Definition.Entity
+  LimitedExp.Call
+  LimitedExp.MethodCall
+  Exp.CollectionCons
+  NFType.GenericType
+  Type.FunctionType
+  Exp.EntityCons
+  Statement.For
+  Statement.ForInferred
+  Statement.While
+  Statement.For
+  Statement.ForInferred
+  FunctionDef.Function
+  FunctionDef.FunctionNoReturnType
+  FunctionDef.SyncFunction
+  FunctionDef.SyncFunctionNoReturnType
+  FunctionDef.StaticFunction
+  FunctionDef.StaticFunctionNoReturnType
+  FunctionDef.StaticSyncFunction
+  FunctionDef.StaticSyncFunctionNoReturnType
+  ScreenElem.Html
+  ScreenElem.HtmlShort
+  ScreenElem.NamedHtml
+  ScreenElem.NamedHtmlShort
+  ControlDefinition.Control
+  ControlDefinition.Control
+  ScreenElem.List
+  ScreenElem.ListInferred
+  ScreenElem.WhenNoElse
+  ScreenElem.When
+  ScreenElem.WhenNoElse
+  ScreenElem.ControlCall
+  ScreenElem.ControlCallNoBody
+  ScreenElem.ControlCallNoArgs
+  Exp.AnonymousFunction
+  Exp.SetComp
+  EntityBodyDecl.Property
+  EntityBodyDecl.PropertyNoAnnos
+  Definition.EntityNoSuper
+  Definition.Service
+  ServiceElem.Resource
+  Definition.TypeNoSuper
+  Definition.Type
+  Definition.ExternalTypeNoSuper
+  ExternalMemberDecl.ExternalStaticMethod
+  ExternalMemberDecl.ExternalMethod
+  ExternalMemberDecl.ExternalStaticSyncMethod
+  ExternalMemberDecl.ExternalSyncMethod
+  Definition.ExternalType
+  Definition.ExternalGenericType
+  Definition.ExternalControl
+  Definition.ExternalScreen
+  Definition.ExternalEntity
+  Definition.ExternalFunction
+  Definition.ExternalSyncFunction
+  Definition.ExternalControl
+  StyleElem.StyleProperty
+  StyleElem.StyleMixinCall
+  Definition.StyleMixin
+  JSStat.JSTryCatch
+  JSStat.JSSwitch
+  Case.JSCase
+  JSStat.JSFunctionDecl
+  JSStat.JSAsyncFunctionDecl
+  Definition.ModuleJavascript
+  Definition.JavascriptFor
+  Definition.ModuleJavascriptFor
+  Definition.ScreenNoReturnType
+  Definition.Screen
+  Start.Module
+  Start.Application

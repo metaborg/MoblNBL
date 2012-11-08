@@ -1,0 +1,47 @@
+application draw
+
+import mobl::canvas
+import mobl::ui::generic
+
+function drawPoint(g : Graphics, color : String, penSize : Num, x : Num, y : Num) {
+  g.fillStyle = color;
+  g.beginPath();
+  g.arc(x, y, penSize, 0, 3.1415 * 2, false);
+  g.closePath();
+  g.fill();
+}
+
+function clear(g : Graphics) {
+  g.fillStyle = "#f0f0f0";
+  g.fillRect(0, 0, window.innerWidth, window.innerHeight);
+}
+
+control colorSquare(newcolor : String, color : String) {
+ <div style="display: inline-block; background-color: " + newcolor + "; width: 30px; height: 30px; border: 1px solid #000;" onclick={
+   color = newcolor;
+ }/>
+}
+
+var colorPalet = ["black", "white", "blue", "yellow", "GoldenRod", "deepskyblue", "green", "red", "purple", "#f0f0f0"];
+
+screen root() {
+  var g : Graphics = null
+  var color = "black"
+  var penSize = 10
+
+  header("mobl draw") {
+    button("Clear", onclick={ clear(g); })
+  }
+  block {
+    list(c in colorPalet) {
+      colorSquare(c, color)
+    }
+  }
+  canvas(g, window.innerWidth, window.innerHeight, ontouchstart={
+    event.preventDefault();
+    drawPoint(g, color, penSize, event.x, event.y);
+  }, ontouchmove={
+    event.preventDefault();
+    drawPoint(g, color, penSize, event.x, event.y);
+  })
+}

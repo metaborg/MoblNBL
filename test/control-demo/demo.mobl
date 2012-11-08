@@ -1,0 +1,236 @@
+application demo
+
+import mobl::ui::generic
+import mobl::ui::generic::datepicker
+import mobl::ui::googlechart
+import mobl::ui::googlemap
+import mobl::location
+
+entity Person {
+  name : String
+  age  : Num
+
+  function toString() : String {
+    return this.name;
+  }
+}
+
+screen root() {
+  header("A header")
+  group {
+    item(onclick={ buttons(); }) { "Buttons" }
+    item(onclick={ lists(); }) { "Lists/tables" }
+    item(onclick={ forms(); }) { "Forms" }
+    item(onclick={ tabs(); }) { "Tabs" }
+    item(onclick={ accordion(); }) { "Accordion" }
+    item(onclick={ master(); }) { "Master detail" }
+    item(onclick={ zoom(); }) { "Zoom list" }
+    item(onclick={ staged(); }) { "Staged list" }
+    item(onclick={ selectList("Select items", Collection<Person>(Person(name="Zef"), Person(name="Eelco"), Person(name="Danny"))); }) { "Markable list" }
+    item(onclick={ charts(); }) { "Charts" }
+    item(onclick={ maps(); }) { "Maps" }
+  }
+}
+
+screen buttons() {
+  header("Buttons") {
+    backButton()
+    button("Button", onclick={ alert("Click!"); })
+  }
+  group {
+    item {
+      "Some item"
+      sideButton("Side button")
+    }
+    item {
+      "Context menu"
+      contextMenu {
+        button("Option 1")
+        button("Option 2")
+      }
+    }
+  }
+  button("Usual button")
+}
+
+screen lists() {
+  header("Lists") {
+    backButton()
+  }
+  group {
+    item { "Group item" }
+    item(onclick={ clickedArrow(); }) { "Arrowed group item" }
+    item {
+      "Group item with context"
+      contextMenu {
+        button("Option")
+      }
+    }
+    item {
+      floatBox(right=10) {
+        "Float to right"
+      }
+      "Content"
+    }
+  }
+  table {
+    row {
+      headerCol { "Header" }
+      headerCol { "Header 2" }
+    }
+    row {
+      col { "Data" }
+      col { "Data" }
+    }
+    row {
+      col { "Data" }
+      col { "Data" }
+    }
+    row {
+      col { "Data" }
+      col { "Data" }
+    }
+  }
+}
+
+screen clickedArrow() {
+  header("Waddup!?") {
+    backButton()
+  }
+}
+
+screen forms() {
+  header("Forms") {
+    backButton()
+  }
+  group {
+    item { textField("", placeholder="Textfield placeholder") }
+    item { textField("", label="with label") }
+    item { selectField("en", [("en", "English"), ("nl", "Dutch")]) }
+    item { numField(7) }
+    item { datePicker(now()) }
+    item { checkBox(true, label="A label")}
+  }
+}
+
+screen tabs() {
+  control tab1() {
+    header("Tab 1") { backButton() }
+    "This is the first tab"
+  }
+
+  control tab2() {
+    header("Tab 2") { backButton() }
+    "This is the second tab"
+  }
+
+  control tab3() {
+    header("Tab 3") { backButton() }
+    "This is the third tab"
+  }
+
+  tabSet([("One", "", tab1), ("Two", "", tab2), ("Three", "", tab3)])
+}
+
+screen accordion() {
+  control section1() {
+    "This is the first section"
+  }
+
+  control section2() {
+    "This is the second section"
+  }
+
+  control section3() {
+    "This is the third section"
+  }
+
+  header("Accordion") { backButton() }
+  accordion([("One", section1), ("Two", section2), ("Three", section3)])
+}
+
+screen master() {
+  var items = Collection<String>("Item 1", "Item 2")
+
+  control detail(item : String) {
+    "This shows details about "
+    label(item)
+    ". For instance, it has length: "
+    label(item.length)
+  }
+
+  control masterItem(item : String) {
+    label(item)
+  }
+
+  header("Master/detail") { backButton() }
+  masterDetail(items, masterItem, detail)
+}
+
+function createBigList() : Collection<Person> {
+  var lst = Collection<Person>();
+  foreach(i in range(0, 40)) {
+    lst.add(Person(name="Person " + i, age=i));
+  }
+  log(lst);
+  return lst;
+}
+
+screen staged() {
+  var coll = createBigList()
+  header("Staged list") {
+    backButton()
+  }
+  control listCtrl(p : Person) {
+    block {
+      label(p.name)
+    }
+  }
+  stagedList(coll order by age, listCtrl)
+}
+
+screen zoom() {
+  var coll = Collection<Person>(Person(name="John", age=22), Person(name="Hank", age=35), Person(name="Joey", age=17))
+  header("Zoom list") {
+    backButton()
+  }
+  control listCtrl(p : Person) {
+    label(p.name)
+  }
+  control zoomCtrl(p : Person) {
+    label(p.name)
+    table {
+      row {
+        headerCol { "Age: "}
+        col { label(p.age) }
+      }
+      row {
+        headerCol { "Gender: "}
+        col { "Male" }
+      }
+    }
+  }
+  zoomList(coll, listCtrl, zoomCtrl)
+}
+
+screen charts() {
+  header("Chart") { backButton() }
+
+  image(googleChartUrl(type="bvg", data=[ [1,2,3,4,5,4,3,2,1] ], title = "Beautiful bar chart"))
+}
+
+screen maps() {
+  var position : Coordinates = null
+  script {
+    async {
+      position = getPosition();
+    }
+  }
+  header("Your location") { backButton() }
+  when(position != null) {
+    label("Position: " + position.latitude + ", " + position.longitude)
+    googleMap(position, zoom=15, height=window.innerHeight-120)
+  } else {
+    "Determining current location... (requires recent webkit or Firefox)"
+  }
+}

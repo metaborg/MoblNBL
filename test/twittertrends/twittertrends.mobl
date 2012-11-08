@@ -1,0 +1,90 @@
+application twittertrends
+
+import mobl::ui::generic
+import mobl::ui::stylemixin
+
+// STYLES
+style tweetStyle { 
+  padding: 10px;
+  margin: 5px;
+  min-height: 50px;
+  background-color: white;
+  border: 1px solid #444;
+  borderRadiusMixin(10px);
+}
+
+style tweetIconStyle {
+  float: left;
+  margin: 0 10px 0 0;
+}
+
+// TYPES
+type Trend {
+  name : String
+  url  : String
+  query: String
+}
+
+type Tweet {
+  profile_image_url : String
+  created_at        : String
+  from_user         : String
+  text              : String
+}
+
+// LOGIC
+function trendsMapper(json : Collection<JSON>) : [Trend] {
+  return json.one().trends;
+} 
+
+function tweetsMapper(json : JSON) : [Tweet] {
+  return json.results;
+} 
+
+// SERVICE
+service Twitter {
+  resource trends() : JSON {
+    uri = "https://api.twitter.com/1/trends/1.json"
+    encoding = "jsonp"
+    method = "GET" 
+    mapper = trendsMapper
+  } 
+
+  resource search(query : String) : JSON {
+    uri = "http://search.twitter.com/search.json?q=" + escape(query)
+    encoding = "jsonp"
+    mapper = tweetsMapper
+  }
+}
+
+// UI
+screen root() {
+  header("Twitter trends")
+  var trends = async(Twitter.trends())
+  whenLoaded(trends) {
+    group {
+      list(topic in trends) {
+        item(onclick={ search(topic.name); }) {
+		  label(topic.name)
+		}
+      }
+    }
+  }
+}
+
+screen search(query : String) {
+  header(query) {
+    backButton()
+  }
+  var results = async(Twitter.search(query))
+  whenLoaded(results) {
+    list(tweet in results) {
+      block(tweetStyle) {
+        image(tweet.profile_image_url,
+              style=tweetIconStyle)
+        <b>label(tweet.from_user) ": "</b>
+        label(tweet.text)
+      }
+    }
+  }
+}

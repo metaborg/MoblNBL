@@ -1,0 +1,9 @@
+{
+  "header-title": "Demonstration",
+  "back": "Back",
+  "about": "About",
+  "about-message": "Welcome to this demonstration application, which demonstrates how you can internationalize your application.",
+  "preferences": "Preferences",
+  "save": "Save",
+  "language": "Language"
+}

@@ -1,0 +1,6 @@
+configuration
+
+title "Todo"
+database "todo"
+//stdlib /Users/zef/git/mobl-lib
+debug

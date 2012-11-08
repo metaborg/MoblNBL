@@ -1,0 +1,16 @@
+module MoblNBL.main
+
+imports MoblNBL-Builders MoblNBL-Colorer MoblNBL-Completions MoblNBL-Folding MoblNBL-Outliner MoblNBL-References MoblNBL-Syntax
+
+language General properties
+                  
+  name          : MoblNBL
+  id            : MoblNBL
+  extends       : Root
+                  
+  description   : "Spoofax/IMP-generated editor for the MoblNBL language"
+  url           : http://strategoxt.org
+                  
+  extensions    : mobl
+  table         : include/MoblNBL.tbl
+  start symbols : Start

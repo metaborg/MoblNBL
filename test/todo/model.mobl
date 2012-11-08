@@ -1,0 +1,8 @@
+module model
+
+entity Task {
+  name        : String (searchable)
+  description : String (searchable)
+  done        : Bool
+  date        : DateTime
+}

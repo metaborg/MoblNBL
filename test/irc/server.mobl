@@ -1,0 +1,52 @@
+server server
+
+import mobl::server::ircclient
+import mobl::server
+import mobl::server::socket
+import messages
+
+type IrcClient {
+  sock : Client
+  irc  : Connection
+}
+
+var clients = Map<Num, IrcClient>();
+
+@socketevent("connect")
+function onConnect(client : Client) {
+  var ircClient = IrcClient(sock=client);
+  clients.set(client.id, ircClient);
+}
+
+@socketevent("message")
+function onMessage(client : Client, message : Dynamic) {
+  var ircClient = clients.get(client.id);
+  if(message.type == MESSAGE_CONNECT) {
+    var connectMsg : ConnectMessage = message;
+    function receiveMessage(nick : String, channel : String, message : String) {
+      ircClient.sock.send(Message(type=MESSAGE_MESSAGE, channel=channel, nick=nick, message=message));
+    }
+    function joinMessage(nick : String, channel : String) {
+      ircClient.sock.send(JoinMessage(type=MESSAGE_JOIN, channel=channel, nick=nick));
+    }
+    function partMessage(nick : String, channel : String) {
+      ircClient.sock.send(PartMessage(type=MESSAGE_PART, channel=channel, nick=nick));
+    }
+    ircClient.irc = Connection.connect(connectMsg.host, connectMsg.nick, onmessage=receiveMessage, onjoin=joinMessage, onpart=partMessage);
+  } else if(message.type == MESSAGE_MESSAGE) {
+    var messageMsg : Message = message;
+    ircClient.irc.say(messageMsg.channel, messageMsg.message);
+  } else if(message.type == MESSAGE_JOIN) {
+    var joinMsg : JoinMessage = message;
+    ircClient.irc.join(joinMsg.channel);
+  }
+}
+
+@socketevent("disconnect")
+function onDisconnect(client : Client) {
+  var ircClient = clients.get(client.id);
+  if(ircClient.irc) {
+    ircClient.irc.disconnect();
+  }
+  clients.set(client.id, null);
+}

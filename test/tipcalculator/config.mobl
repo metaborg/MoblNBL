@@ -1,0 +1,4 @@
+configuration
+
+title "Tip calculator"
+style $baseColor = rgb(100, 100, 100)

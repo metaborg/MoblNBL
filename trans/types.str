@@ -1,0 +1,27 @@
+module types
+
+imports
+  
+  libstratego-lib
+  include/MoblNBL
+  lib/index-library.generated
+  lib/analysis-library.generated
+  names
+  
+rules
+	
+	type-of:
+		Var(x) -> <type-of> <index-lookup> x
+		
+  // Lazy resolving of types because index-lookup during use analysis on data fails for imports.
+  type-of:
+    SimpleType(t{[Unresolved(Type())|_]}) -> SimpleType(name{uri})
+    where
+      Def(uri) := <index-lookup> t;
+      name := <strip-annos> t
+      
+  type-of:
+    SimpleType(t{[Type()|_]}) -> <id> 
+		
+  type-of:
+    Def(uri) -> <type-of> <index-get-data(|Type())> Def(uri)

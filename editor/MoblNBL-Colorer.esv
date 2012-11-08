@@ -1,0 +1,9 @@
+module MoblNBL-Colorer
+
+imports MoblNBL-Colorer.generated
+
+colorer
+                                                                      
+  // This file can be used for custom colorer rules.                  
+  //                                                                  
+  // See the imported file for a brief introduction and examples.     

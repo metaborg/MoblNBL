@@ -1,0 +1,4 @@
+configuration
+
+title "PhoneGap Demo"
+html index.html

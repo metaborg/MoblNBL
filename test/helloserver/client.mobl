@@ -1,0 +1,16 @@
+application client
+
+import mobl::ui::generic
+import mobl::socket
+
+screen root() {
+  function onMessage(msg : Dynamic) {
+    alert(msg);
+  }
+  var sock = Socket.create(onMessage)
+  header("Hello client") {
+    button("Push", onclick={
+      sock.send("Waddup!");
+    })
+  }
+}

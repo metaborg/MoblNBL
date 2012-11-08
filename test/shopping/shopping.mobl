@@ -1,0 +1,84 @@
+application shopping
+
+import mobl::ui::generic
+
+entity Item {
+  name     : String
+  checked  : Bool
+  favorite : Bool
+  onlist   : Bool
+  order    : Num
+}
+
+screen editItem(it : Item) {
+  header("Edit item") {
+    button("Done", onclick={ screen return; })
+  }
+  group {
+    item { textField(it.name, placeholder="Name") }
+    item { checkBox(it.favorite, label="favorite") }
+    item { numField(it.order, placeholder="Shop order (0 = early, 999=late)") }
+  }
+}
+
+function clean() {
+  var b = true;
+  
+  foreach(it : Item in Item.all().filter("checked", "=", true)) {
+    if(it.favorite) {
+      it.checked = false;
+      it.onlist = false;
+    } else {
+      remove(it);
+    }
+  }
+}
+
+control showItems() {
+  header("Show Items") {
+    button("Clean", onclick={ clean(); })
+  }
+  group {
+    list(it in Item.all().filter("onlist", "=", true).order("order", true)) {
+      item {
+        checkBox(it.checked, label=it.name)
+        contextMenu {
+          button("Edit", onclick={ editItem(it); })
+        }
+      }
+    }
+  }
+  quickAdd()
+  button("Reset", onclick={
+    resetDatabase();
+  })
+}
+
+control showFavorites() {
+  header("Favorites")
+  group {
+    list(it in Item.all().filter("favorite", "=", true).order("order", true)) {
+      item(onclick={ editItem(it); }) {
+        label(it.name)
+        when(!it.onlist) {
+          sideButton("Add", onclick={ it.onlist = true; })
+        }
+      }
+    }
+  }
+}
+
+control quickAdd() {
+  var newItem = Item(order=999, onlist=true)
+  group {
+    item { textField(newItem.name, placeholder="New item") }
+  }
+  button("Add", onclick={
+    add(newItem);
+    newItem = Item(order=999, onlist=true);
+  })
+}
+
+screen root() {
+  tabSet([("Items", "lib/toolbar/icon_users.png", showItems), ("Favorite", "lib/toolbar/icon_users.png", showFavorites)])
+}
