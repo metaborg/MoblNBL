@@ -23,6 +23,8 @@ signature
     Import      : Namespace
     Type        : Namespace
     Screen      : Namespace
+    Service     : Namespace
+    Resource    : Namespace
     Style       : Namespace
     Control     : Namespace
     Method      : Namespace
@@ -34,11 +36,12 @@ rules
 
   nam-get-scope-types :
     Application(x, _) -> [ Screen()
-                         , Variable()
+                         , Service()
                          , Style()
                          , Control()
                          , Type()
                          , Method()
+                         , Variable()
                          ]
 
   nam-get-definition-keys :
@@ -58,11 +61,12 @@ rules
 
   nam-get-scope-types :
     Module(x, _) -> [ Screen()
-                    , Variable()
+                    , Service()
                     , Style()
                     , Control()
                     , Type()
                     , Method()
+                    , Variable()
                     ]
 
   nam-get-definition-keys :
@@ -97,7 +101,14 @@ rules
 
   adjust-index-def-data(store__|namespace__, path__):
     Import(x) -> <store__> DefData(
-                             [Variable()|[<index-file-to-string> <index-get-current-file>]]
+                             [Screen()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Service()|[<index-file-to-string> <index-get-current-file>]]
                            , Import()
                            , (x, [CurrentFile()])
                            )
@@ -126,6 +137,13 @@ rules
   adjust-index-def-data(store__|namespace__, path__):
     Import(x) -> <store__> DefData(
                              [Method()|[<index-file-to-string> <index-get-current-file>]]
+                           , Import()
+                           , (x, [CurrentFile()])
+                           )
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Import(x) -> <store__> DefData(
+                             [Variable()|[<index-file-to-string> <index-get-current-file>]]
                            , Import()
                            , (x, [CurrentFile()])
                            )
@@ -330,24 +348,37 @@ rules
 rules
 
   nam-get-uses-keys :
-    SimpleType(x) -> [x]
+    SimpleType(x) -> [x, "Object", "JSON", "Dynamic"]
 
   nam-get-uses :
-    SimpleType(x) -> [(Type(), [x])]
+    SimpleType(x) -> [ (Type(), [x])
+                     , (Type(), ["Object"])
+                     , (Type(), ["JSON"])
+                     , (Type(), ["Dynamic"])
+                     ]
 
   nam-annotate-names(|paths__, path__):
     SimpleType(x) -> <SimpleType(nam-annotate-use(|paths__, Type()))>
+
+  adjust-index-lookup(target__|namespace__, path__, prefix__):
+    SimpleType(x) -> <concat> [ [[Type()|path__]]
+                              , [Def([Type(), "Object"])]
+                              , [Def([Type(), "JSON"])]
+                              , [Def([Type(), "Dynamic"])]
+                              ]
+    where <target__> x
 
 
 rules
 
   nam-get-scope-types :
-    ScreenNoReturnType(_, x, _, _) -> [ Variable()
-                                      , Style()
+    ScreenNoReturnType(_, x, _, _) -> [ Style()
+                                      , Service()
                                       , Control()
                                       , Type()
                                       , Method()
                                       , Property()
+                                      , Variable()
                                       ]
 
   nam-get-definition-keys :
@@ -361,6 +392,62 @@ rules
 
   nam-unique :
     ScreenNoReturnType(_, x, _, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Service(_, x, _) -> [Method()]
+
+  nam-get-definition-keys :
+    Service(_, x, _) -> [x]
+
+  nam-get-definitions :
+    Service(_, x, _) -> [(Type(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Service(_, x, _) -> <Service(id, nam-annotate-def(|path__), id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Service(_, x, _) -> <store__> DefData(
+                                    [namespace__|path__]
+                                  , Type()
+                                  , SimpleType(x)
+                                  )
+
+  type-of :
+    Service(_, x, _) -> SimpleType(x)
+
+  nam-unique :
+    Service(_, x, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Resource(_, x, _, t, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    Resource(_, x, _, t, _) -> [x]
+
+  nam-get-definitions :
+    Resource(_, x, _, t, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Resource(_, x, _, t, _) -> <Resource(id, nam-annotate-def(|path__), id, id, id)>
+
+  adjust-index-def-data(store__|namespace__, path__):
+    Resource(_, x, _, t, _) -> <store__> DefData(
+                                           [namespace__|path__]
+                                         , Type()
+                                         , t
+                                         )
+
+  type-of :
+    Resource(_, x, _, t, _) -> t
+
+  nam-unique :
+    Resource(_, x, _, t, _) -> <id>
 
 
 rules
@@ -419,6 +506,24 @@ rules
 
   nam-unique :
     ExternalControl(_, x, _) -> <id>
+
+
+rules
+
+  nam-get-scope-types :
+    Function(_, x, _, t, _) -> [Variable()]
+
+  nam-get-definition-keys :
+    Function(_, x, _, t, _) -> [x]
+
+  nam-get-definitions :
+    Function(_, x, _, t, _) -> [(Method(), [x])]
+
+  nam-annotate-names(|paths__, path__):
+    Function(_, x, _, t, _) -> <Function(id, nam-annotate-def(|path__), id, id, id)>
+
+  nam-unique :
+    Function(_, x, _, t, _) -> <id>
 
 
 rules
@@ -801,7 +906,9 @@ rules
 
   nam-get-uses :
     Var(x) -> [ (Variable(), [x])
+              , (Method(), [x])
               , (Type(), [x])
+              , (Service(), [x])
               , (Style(), [x])
               , (Control(), [x])
               , (Type(), ["Object"])
@@ -816,7 +923,9 @@ rules
 
   adjust-index-lookup(target__|namespace__, path__, prefix__):
     Var(x) -> <concat> [ [ [Variable()|path__]
+                         , [Method()|path__]
                          , [Type()|path__]
+                         , [Service()|path__]
                          , [Style()|path__]
                          , [Control()|path__]
                          ]
@@ -827,3 +936,21 @@ rules
                        , [Def([Variable(), "event"])]
                        ]
     where <target__> x
+
+
+rules
+
+  nam-get-scope-types :
+    ControlCallNoArgs(_, _) -> [Variable()]
+
+
+rules
+
+  nam-get-scope-types :
+    ControlCallNoBody(_, _) -> [Variable()]
+
+
+rules
+
+  nam-get-scope-types :
+    ControlCall(_, _, _) -> [Variable()]

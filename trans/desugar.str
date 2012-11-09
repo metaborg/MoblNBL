@@ -12,7 +12,13 @@ strategies
 rules
 
   desugar:
-  	Module(name, defs) -> Module(<desugar-import-name> name, defs)
+    Application(name, defs) -> Application(<try(desugar-import-name)> name, [Import("mobl")|defs])
+
+  desugar:
+  	Module(name, defs) -> Module(dname, [Import("mobl")|defs])
+  	where
+  	  dname := <try(desugar-import-name)> name;
+  	  not("mobl" := dname)
   		
   desugar:
     Import(name) -> Import(<desugar-import-name> name)
@@ -27,11 +33,3 @@ rules
 	    where
 	      not(<is-string> l);
 	      ls := <desugar-import-name> l
-	      
-rules
-  
-  desugar:
-    Application(name, defs) -> Application(name, [Import("mobl")|defs])
-    
-  desugar:
-    Module(name, defs) -> Application(name, [Import("mobl")|defs])

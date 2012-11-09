@@ -13,7 +13,8 @@ namespaces
 	Type
 	
 	Screen
-	
+	Service
+	Resource
 	Style
 	Control
 	
@@ -26,19 +27,21 @@ rules // Top
 
   Application(x, _) :
     defines Application x
-    scopes Screen, Variable, Style, Control, Type, Method
+    scopes Screen, Service, Style, Control, Type, Method, Variable
     
   Module(x, _) :
     defines Module x
-    scopes Screen, Variable, Style, Control, Type, Method
+    scopes Screen, Service, Style, Control, Type, Method, Variable
     
   Import(x) :
     defines non-unique Import x
-    imports Variable from Module x {current-file}
+    imports Screen from Module x {current-file}
+    imports Service from Module x {current-file}
     imports Style from Module x {current-file}
     imports Control from Module x {current-file}
     imports Type from Module x {current-file}
     imports Method from Module x {current-file}
+    imports Variable from Module x {current-file}
     refers to Module x
     
 rules // Type
@@ -75,13 +78,26 @@ rules // Type
     
   SimpleType(x) :
   	refers to Type x
-    
+    refers to Type "Object"
+    refers to Type "JSON"
+    refers to Type "Dynamic"
+        
 rules // Screen
     
   ScreenNoReturnType(_, x, _, _) :
     defines Screen x
-    scopes Variable, Style, Control, Type, Method, Property
+    scopes Style, Service, Control, Type, Method, Property, Variable
     // HACK: Needs to scope everything to fix path creation.
+    
+rules // Service
+
+  Service(_, x, _) :
+  	defines Type x of type SimpleType(x) // HACK: Should define a Service, scope Resource.
+  	scopes Method
+  	
+  Resource(_, x, _, t, _) :
+  	defines Method x of type t // HACK: Should define a Resource.
+  	scopes Variable
     
 rules // Style
    
@@ -98,6 +114,10 @@ rules // Style
     scopes Variable
 
 rules // Method
+
+  Function(_, x, _, t, _) :
+  	defines Method x
+  	scopes Variable
 
   ExternalFunction(_, x, _, _) :
     defines Method x
@@ -128,6 +148,7 @@ rules // Method
     
   MethodCall(e, x, _) :
     refers to Method x in Type t
+    //refers to Resource x in Service t
     where e has type SimpleType(t) 
     
   Call(x, _) :
@@ -176,7 +197,9 @@ rules // Variable
     
   Var(x) :
   	refers to Variable x
+  	refers to Method x
   	refers to Type x
+  	refers to Service x
   	refers to Style x
   	refers to Control x
   	
@@ -188,3 +211,13 @@ rules // Variable
   	
   	refers to Variable "event"
   	
+rules // Control flow
+
+  ControlCallNoArgs(_, _) :
+  	scopes Variable
+
+  ControlCallNoBody(_, _) :
+    scopes Variable
+  	
+  ControlCall(_, _, _) :
+    scopes Variable
